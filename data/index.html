@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stinol 102L v1</title>
+<style>
+:root { --bg:#0f172a; --surface:#1e293b; --surface2:#334155; --text:#f1f5f9; --text2:#94a3b8; --primary:#2563eb; --ok:#16a34a; --warn:#d97706; --err:#dc2626; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,sans-serif; background:var(--bg); color:var(--text); }
+.container { max-width:500px; margin:0 auto; padding:16px; }
+.card { background:var(--surface); border-radius:12px; padding:16px; margin-bottom:12px; }
+.card h2 { font-size:0.9rem; color:var(--primary); margin-bottom:8px; text-transform:uppercase; }
+.stat { text-align:center; padding:12px; }
+.stat .val { font-size:2rem; font-weight:600; }
+.stat .lbl { font-size:0.75rem; color:var(--text2); }
+.grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.temp { color:#38bdf8; } .ok { color:var(--ok); } .warn { color:var(--warn); } .err { color:var(--err); }
+.footer { text-align:center; padding:16px; color:var(--text2); font-size:0.75rem; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div style="text-align:center;padding:20px 0">
+    <h1 style="font-size:1.3rem;color:var(--primary)">Stinol 102L</h1>
+    <div style="color:var(--text2);font-size:0.8rem">Smart Fridge Controller v1</div>
+  </div>
+  <div class="card">
+    <h2>Temperature</h2>
+    <div class="stat"><div class="val temp" id="temp">--.- &deg;C</div><div class="lbl" id="sensor">--</div></div>
+  </div>
+  <div class="card">
+    <h2>Compressor</h2>
+    <div class="grid">
+      <div class="stat"><div class="val" id="relay">--</div><div class="lbl">Relay</div></div>
+      <div class="stat"><div class="val" id="heap">--</div><div class="lbl">Free Heap</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Network</h2>
+    <div class="grid">
+      <div class="stat"><div class="val" id="wifi">--</div><div class="lbl">WiFi</div></div>
+      <div class="stat"><div class="val" id="mqtt">--</div><div class="lbl">MQTT</div></div>
+    </div>
+  </div>
+  <div class="footer">Stinol 102L v1 — OgurSoft</div>
+</div>
+<script>
+setInterval(function(){
+  fetch('/api/status').then(r=>r.json()).then(d=>{
+    document.getElementById('temp').textContent=d.temperature.toFixed(1)+' °C';
+    var s=document.getElementById('sensor');
+    s.textContent=d.sensor_ok?'OK':'ERROR'; s.className='lbl '+(d.sensor_ok?'ok':'err');
+    var r=document.getElementById('relay');
+    r.textContent=d.relay_on?'ON':'OFF'; r.className='val '+(d.relay_on?'warn':'ok');
+    document.getElementById('heap').textContent=(d.free_heap/1024).toFixed(1)+' KB';
+    document.getElementById('wifi').textContent=d.wifi_connected?d.ip:'Disconnected';
+    document.getElementById('mqtt').textContent=d.mqtt_connected?'OK':'Disconnected';
+  });
+},3000);
+</script>
+</body>
+</html>
